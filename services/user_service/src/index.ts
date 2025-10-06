@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 import RedisConnection from "./config/redis.js";
 import MongoDB from "./config/db.js";
 import UserRouter from "./routes/user.routes.js";
-import {connectRabbitMQ} from "./config/queue.js";
+import {connectRabbitMQ} from "./config/rabbitMQ.js";
 
 dotenv.config();
 
