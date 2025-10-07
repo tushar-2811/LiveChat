@@ -12,13 +12,22 @@ const startServer = async () => {
     const db = MongoDB.getConnection();
     console.log("db state :", db.readyState);
 
-    const redisConnection = RedisConnection.getInstance();
-    redisConnection.connect();
+    const redisInstance = RedisConnection.getInstance();
+    redisInstance.connect();
 
     connectRabbitMQ();
 
     const app = express();
     const port = process.env.PORT;
+
+    app.use(express.json());
+
+    app.get('/health' , (req,res) =>{
+        res.status(200).json({
+            message : "eveything working fine"
+        })
+        return;
+    })
 
 
     app.use('/api/v1' , UserRouter);
