@@ -1,5 +1,6 @@
 import { publishToQueue } from "../config/rabbitMQ.js";
 import RedisConnection from "../config/redis.js";
+import type { AuthenticatedRequest } from "../middleware/authMiddleware.js";
 import { User } from "../model/user.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { generateToken } from "../utils/generateToken.js";
@@ -113,3 +114,63 @@ export const verifyUserController = asyncHandler(async (req,res) => {
      });
      return;
 })
+
+export const userProfileController = asyncHandler(async (req:AuthenticatedRequest , res) => {
+     const user = req.user;
+
+     res.status(200).json({
+        success : true,
+        user
+     });
+     return;
+})
+
+export const updateNameController = asyncHandler(async(req: AuthenticatedRequest , res) => {
+    const {name : newName} = req.body;
+    const email = req.user?.email;
+
+    const user = await User.findOne({email});
+
+    if(!user){
+        res.status(404).json({
+            success : false,
+            message : "user not found"
+        });
+        return;
+    }
+
+    user.name = newName;
+    await user.save();
+
+    const token = await generateToken(user);
+
+    res.status(200).json({
+        success : true,
+        message : "user name is updated",
+        user,
+        token
+    })
+
+})
+
+export const getAllUsersController = asyncHandler(async(req, res) => {
+    const allUsers = await User.find();
+
+    res.status(200).json({
+        success : true,
+        users : allUsers
+    })
+    return;
+})
+
+export const getSingleUserController = asyncHandler(async(req: AuthenticatedRequest , res) => {
+    const user = await User.findById(req.params.id);
+
+    res.status(200).json({
+        success : true,
+        user
+    })
+    return;
+})
+
+

@@ -4,6 +4,7 @@ import RedisConnection from "./config/redis.js";
 import MongoDB from "./config/db.js";
 import UserRouter from "./routes/user.routes.js";
 import {connectRabbitMQ} from "./config/rabbitMQ.js";
+import cors from 'cors';
 
 dotenv.config();
 
@@ -21,6 +22,8 @@ const startServer = async () => {
     const port = process.env.PORT;
 
     app.use(express.json());
+
+    app.use(cors());
 
     app.get('/health' , (req,res) =>{
         res.status(200).json({

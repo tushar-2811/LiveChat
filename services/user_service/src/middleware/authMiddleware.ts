@@ -29,10 +29,15 @@ export const isAuthMiddleware = async(req: AuthenticatedRequest , res: Response 
             return;
         }
 
-        
+        req.user = decodedValue.user;
+        next();
 
     } catch (error) {
-        
+        res.status(401).json({
+            success : false,
+            message : "JWT error"
+        })
+        return;
     }
 
 }
