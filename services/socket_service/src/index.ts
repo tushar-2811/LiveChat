@@ -6,13 +6,16 @@ import chatRouter from './routes/chat.js';
 dotenv.config();
 
 const startServer = async () => {
+   console.log("hello")
    await MongoDB.connect();
    const db = MongoDB.getConnection();
    console.log("db state :", db.readyState);
 
 
    const app = express();
-   const port = process.env.PORT;
+   const port = process.env.PORT || 4005;
+
+   app.use(express.json());
 
    app.use('/api/v1/chat',chatRouter);
 

@@ -1,6 +1,8 @@
+import axios, { all } from "axios";
 import type { AuthenticatedRequest } from "../middlewares/authMiddleware.js";
 import { Chat } from "../models/chat.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { Message } from "../models/message.model.js";
 
 export const createChatController = asyncHandler(async (req:AuthenticatedRequest , res) =>{
      const userId = req.user?._id;
@@ -42,4 +44,64 @@ export const createChatController = asyncHandler(async (req:AuthenticatedRequest
      });
      return;
      
+});
+
+
+export const getAllChatsController = asyncHandler(async (req:AuthenticatedRequest , res) => {
+   const userId = req.user?._id;
+
+   if(!userId){
+      res.status(400).json({
+         success : false,
+         message : "User id missing"
+      });
+      return;
+   }
+
+   const allChats = await Chat.find({
+      users : userId
+   }).sort({updatedAt : -1});
+
+   const chatWithUserData = await Promise.all(
+      allChats.map( async (chat) => {
+           const otherUserId = chat.users.find( (id) => id.toString() !== userId.toString() );
+           const unSeenCount = await Message.countDocuments({
+               chatId : chat._id,
+               sender : { $ne : userId },
+               isSeen : false
+           });
+
+           try {
+             const {data} = await axios.get(`${process.env.USER_SERVICE_URL}/api/v1/users/${otherUserId}`);
+               return {
+                  user : data,
+                  chat : {
+                     ...chat.toObject(),
+                     latestMessage : chat.latestMessage || null,
+                     unSeenCount
+                  }
+               }
+           } catch (error) {
+               console.error("Error fetching user data: ", error);
+               return {
+                  user : {
+                     _id : otherUserId,
+                     name : "Unknown User",
+                  },
+                  chat : {
+                     ...chat.toObject(),
+                     latestMessage : chat.latestMessage || null,
+                     unSeenCount
+                  }
+               };
+           }
+
+      } )
+   );
+
+   res.status(200).json({
+      success : true,
+      chats : chatWithUserData
+   });
+   return;
 })
