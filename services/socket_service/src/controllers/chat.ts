@@ -105,3 +105,202 @@ export const getAllChatsController = asyncHandler(async (req:AuthenticatedReques
    });
    return;
 })
+
+
+
+export const sendMessageController = asyncHandler(async (req: AuthenticatedRequest, res) => {
+   const senderId = req.user?._id;
+   const { chatId, text } = req.body;
+   const imageFile = req.file; // Assuming you're using multer for file uploads
+
+   if(!senderId){
+      res.status(401).json({
+         success : false,
+         message : "Unauthorized"
+      });
+      return;
+   };
+
+   if (!chatId) {
+      res.status(400).json({
+         success: false,
+         message: "chatId required",
+      });
+      return;
+   }
+
+   if(!text && !imageFile){
+      res.status(400).json({
+         success : false,
+         message : "Either text or image is required to send a message"
+      });
+      return;
+   };
+
+   const chat = await Chat.findById(chatId);
+
+   if(!chat){
+      res.status(404).json({
+         success : false,
+         message : "Chat not found"
+      });
+      return;
+   };
+
+   const isUserInChat = chat.users.some( (id) => id.toString() === senderId.toString() );
+
+   if(!isUserInChat){
+      res.status(403).json({
+         success : false,
+         message : "You are not a participant of this chat"
+      });
+      return;
+   };
+
+   const otherUserId = chat.users.find((id) => id.toString() !== senderId.toString());
+
+   if(!otherUserId){
+      res.status(401).json({
+         success : false,
+         message : "Cannot determine the recipient of the message"
+      });
+      return;
+   };
+
+   let messageData: any = {
+      chatId,
+      sender : senderId,
+      isSeen : false,
+      seenAt : undefined,
+   };
+
+   if(imageFile){
+      messageData.image = {
+         url : imageFile.path,
+         publicId : imageFile.filename
+      };
+      messageData.messageType = "image";
+   }else{
+      messageData.text = text;
+      messageData.messageType = "text";
+   }
+
+   const newMessage = await Message.create(messageData);
+
+   const latestMessageText = imageFile ? "Image 📷"  : text;
+
+   await Chat.findByIdAndUpdate(chatId, {
+      latestMessage : {
+         text : latestMessageText,
+         sender : senderId
+      },
+      updateAt : new Date()
+   },{new : true});
+
+   // emit socket event to other user
+
+   res.status(201).json({
+      success : true,
+      message : "Message sent successfully",
+      sender : senderId,
+      data : newMessage
+   });
+   return;  
+
+});
+
+
+export const getMessagesByChatController = asyncHandler(async (req:AuthenticatedRequest , res) => {
+   const userId = req.user?._id;
+   const {chatId} = req.params;
+
+   if(!userId){
+      res.status(401).json({
+         success : false,
+         message : "Unauthorized"
+      });
+      return;
+   };
+
+   if(!chatId){
+      res.status(400).json({
+         success : false,
+         message : "chatId is required"
+      });
+      return;
+   };
+
+   const chat = await Chat.findById(chatId);
+
+   if(!chat){
+      res.status(404).json({
+         success : false,
+         message : "Chat not found"
+      });
+      return;
+   };
+
+   const isUserInChat = chat.users.some( (id) => id.toString() === userId.toString() );
+
+   if(!isUserInChat){
+      res.status(403).json({
+         success : false,
+         message : "You are not a participant of this chat"
+      });
+      return;
+   };
+
+   const messagesToMarkSeen = await Message.find({
+      chatId : chatId,
+      sender : { $ne : userId },
+      isSeen : false
+   });
+
+   await Message.updateMany({
+      chatId : chatId,
+      sender : { $ne : userId },
+      isSeen : false
+   },{
+      isSeen : true,
+      seenAt : new Date()
+   });
+
+   const messages = await Message.find({ chatId : chatId }).sort({ createdAt : 1 });
+
+   const otherUserId = chat.users.find((id) => id.toString() !== userId.toString());
+
+   try {
+      const {data} = await axios.get(`${process.env.USER_SERVICE_URL}/api/v1/users/${otherUserId}`);
+
+      if(!otherUserId){
+         res.status(401).json({
+            success : false,
+            message : "Cannot determine the recipient of the message"
+         });
+         return;
+      }
+      // emit socket event to other user about messages being seen
+      
+      res.status(200).json({
+         success : true,
+         message : "Messages fetched successfully",
+         user : data,
+         messagesData : messages,
+      });
+      return;
+   } catch (error) { 
+      console.error("Error fetching user data: ", error);
+      res.status(200).json({
+         success : true,
+         message : "Messages fetched successfully",
+         user : {
+            _id : otherUserId,
+            name : "Unknown User",
+         },
+         messagesData : messages,
+      });
+      return;
+   }
+      
+   
+})
