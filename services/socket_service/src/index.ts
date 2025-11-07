@@ -1,5 +1,6 @@
 import express from 'express'
 import dotenv from 'dotenv'
+import cors from 'cors'
 import MongoDB from './config/db.js';
 import chatRouter from './routes/chat.js';
 
@@ -14,7 +15,8 @@ const startServer = async () => {
 
    const app = express();
    const port = process.env.PORT || 4005;
-
+   
+   app.use(cors());
    app.use(express.json());
 
    app.use('/api/v1/chat',chatRouter);
