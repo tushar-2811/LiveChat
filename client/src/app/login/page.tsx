@@ -26,6 +26,7 @@ import { loginFormSchema } from "@/Schema/Schema";
 import { useRouter } from "next/navigation";
 import useToast from "@/components/_components/useToast";
 import axios from "axios";
+import { config } from "@/config/config";
 
 const page = () => {
     const [loading, setLoading] = useState<Boolean>(false);
@@ -42,11 +43,13 @@ const page = () => {
         setLoading(true);
 
         try {
-            // const { data: any } = await axios.post(`${process.env.USER_SERVICE_URL}/api/v1/login`, {
-            //     email: email,
-            // });
-
+            const { data: any } = await axios.post(`${config.USER_SERVICE.SEND_OTP}`, {
+                email: email,
+            });
+            
+            useToast("OTP Sent", `An OTP has been sent to ${email}`);
             router.push(`/verify-otp?email=${email}`);
+
         } catch (error: any) {
             console.log(error.message);
             useToast("Error Occurred", error.message);
@@ -62,7 +65,7 @@ const page = () => {
             <Card className="w-full sm:max-w-md">
                 <CardHeader>
                     <CardTitle className="text-4xl bg-linear-to-r from-pink-500 via-pink-200 to-transparent bg-clip-text text-transparent">ChatX</CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-md">
                         Join ChatX and start chatting instantly.
                     </CardDescription>
                 </CardHeader>

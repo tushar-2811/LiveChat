@@ -5,5 +5,5 @@ export const loginFormSchema = z.object({
 })
 
 export const otpFormSchema = z.object({
-    otp: z.string().length(6, "Your one-time password must be 6 characters."),
+    otp: z.string().length(6, "Your one-time password must be 6 digts."),
 })

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import * as z from "zod"
+import Cookies from "js-cookie";
 
 import { Button } from "@/components/ui/button"
 import {
@@ -32,18 +33,18 @@ import { otpFormSchema } from "@/Schema/Schema";
 import { useRouter, useSearchParams } from "next/navigation";
 import useToast from "@/components/_components/useToast";
 import axios from "axios";
+import { config } from "@/config/config";
 
 
 const page = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const TIMER_INITIAL = 10;
     const [timer, setTimer] = useState<number>(TIMER_INITIAL);
-    const [isCounting, setIsCounting] = useState<boolean>(true);
-    const intervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
     const router = useRouter();
 
     const searchParams = useSearchParams();
-    const email = searchParams.get("email") || "your email";
+    const email = searchParams.get("email");
+
 
     const form = useForm<z.infer<typeof otpFormSchema>>({
         resolver: zodResolver(otpFormSchema),
@@ -56,67 +57,67 @@ const page = () => {
         setLoading(true);
 
         try {
-            const { data: any } = await axios.post(`${process.env.USER_SERVICE_URL}/api/v1/verify-otp`, {
+            const { data } = await axios.post(`${config.USER_SERVICE.VERIFY_OTP}`, {
                 otp: otp,
                 email: email,
             });
             console.log(otp);
-
+            console.log("data verify otp", data);
+            Cookies.set("token", data.token , {
+                expires: 7, // Cookie expires in 7 days
+                secure: false, // Cookie only sent over HTTPS
+                path: '/', // Cookie available on all paths
+            });
+            useToast("Success", "OTP Verified Successfully");
+            router.replace('/chat');
         } catch (error: any) {
-            console.log(error.message);
-            useToast("Error Occurred", error.message);
+            console.log(error);
+            useToast("Error Occurred", error.response.data.message);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const handleResendOTP = async () => {
+        try {
+            setLoading(true);
+            if (!email) {
+                router.push('/login');
+                return;
+            }
+            const { data: any } = await axios.post(`${config.USER_SERVICE.SEND_OTP}`, {
+                email: email,
+            });
+            setTimer(TIMER_INITIAL);
+            useToast("OTP Sent", `A new OTP was sent to ${email}`);
+        } catch (err: any) {
+            useToast("Error", err?.message || "Failed to resend OTP");
         } finally {
             setLoading(false);
         }
     }
 
     useEffect(() => {
-        // start or stop the interval based on isCounting
-        if (isCounting) {
-            // clear any existing interval first
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-                intervalRef.current = null;
-            }
-
-            intervalRef.current = setInterval(() => {
-                setTimer((prev) => {
-                    if (prev <= 1) {
-                        // stop interval and mark counting stopped
-                        if (intervalRef.current) {
-                            clearInterval(intervalRef.current);
-                            intervalRef.current = null;
-                        }
-                        setIsCounting(false);
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-        } else {
-            // not counting: ensure interval cleared
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-                intervalRef.current = null;
-            }
+        if (!email) {
+            router.push('/login');
         }
+    }, [email, router]);
 
-        return () => {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-                intervalRef.current = null;
-            }
+    useEffect(() => {
+        if (timer > 0) {
+            const interval = setInterval(() => {
+                setTimer((prev) => prev - 1);
+            }, 1000);
+            return () => clearInterval(interval);
         };
-    }, [isCounting]);
-
-
+    }, [timer]);
 
     return (
         <div className='min-h-screen flex items-center justify-center'>
             <Card className="w-full sm:max-w-md">
                 <CardHeader>
-                     <CardTitle className="text-4xl bg-linear-to-r from-pink-500 via-pink-200 to-transparent bg-clip-text text-transparent">ChatX</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-4xl bg-linear-to-r from-pink-500 via-pink-200 to-transparent bg-clip-text text-transparent">ChatX</CardTitle>
+                    <CardDescription className="text-md">
                         Join ChatX and start chatting instantly.
                     </CardDescription>
                 </CardHeader>
@@ -144,7 +145,7 @@ const page = () => {
                                         </div>
 
                                         <FieldDescription className="flex justify-center text-center">
-                                            Please enter the one-time password sent to {email}
+                                            Please enter the one-time password sent to {email || "your email"}
                                         </FieldDescription>
                                         {fieldState.invalid && (
                                             <FieldError errors={[fieldState.error]} />
@@ -162,29 +163,15 @@ const page = () => {
                         </Button>
                     </Field>
                     <div>
-                       {
-                         timer > 0 ? (
-                            <p className="text-sm text-neutral-400">Resend After {timer} seconds.</p>
-                         ) : (
-                            <Button variant="link" onClick={async () => {
-                                try {
-                                    setLoading(true);
-                                    // TODO: call resend API endpoint here if available
-                                    // await axios.post(`${process.env.USER_SERVICE_URL}/api/v1/resend-otp`, { email });
-                                    // Reset timer and start counting again
-                                    setTimer(TIMER_INITIAL);
-                                    setIsCounting(true);
-                                    useToast("OTP Sent", `A new OTP was sent to ${email}`);
-                                } catch (err: any) {
-                                    useToast("Error", err?.message || "Failed to resend OTP");
-                                } finally {
-                                    setLoading(false);
-                                }
-                            }}>
-                                Resend OTP
-                            </Button>
-                         )
-                       }
+                        {
+                            timer > 0 ? (
+                                <p className="text-sm text-neutral-400">Resend After {timer} seconds.</p>
+                            ) : (
+                                <Button variant="outline" onClick={handleResendOTP} disabled={loading}>
+                                    Resend OTP
+                                </Button>
+                            )
+                        }
                     </div>
                 </CardFooter>
             </Card>
