@@ -24,7 +24,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { loginFormSchema } from "@/Schema/Schema";
 import { useRouter } from "next/navigation";
-import useToast from "@/components/_components/useToast";
+// import useToast from "@/components/_components/useToast";
 import axios from "axios";
 import { config } from "@/config/config";
 
@@ -47,12 +47,12 @@ const LoginContainer = () => {
                 email: email,
             });
             
-            useToast("OTP Sent", `An OTP has been sent to ${email}`);
+            // useToast("OTP Sent", `An OTP has been sent to ${email}`);
             router.push(`/verify-otp?email=${email}`);
 
         } catch (error: any) {
             console.log(error.message);
-            useToast("Error Occurred", error.message);
+            // useToast("Error Occurred", error.message);
         } finally {
             setLoading(false);
         }

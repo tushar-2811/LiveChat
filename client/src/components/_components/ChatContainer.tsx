@@ -1,9 +1,10 @@
 import React from 'react'
+import ChatHeader from './ChatHeader'
 
 const ChatContainer = () => {
   return (
-    <div>
-      
+    <div className=''>
+        <ChatHeader/>
     </div>
   )
 }

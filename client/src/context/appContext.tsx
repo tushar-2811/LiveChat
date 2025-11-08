@@ -4,8 +4,6 @@ import React, { createContext, ReactNode, useContext, useEffect, useState } from
 import Cookies from "js-cookie";
 import axios from "axios";
 import { config } from "@/config/config";
-import { useTheme } from "next-themes";
-import useToast from "@/components/_components/useToast";
 
 export interface User {
     _id: string;
@@ -80,7 +78,7 @@ export const AppProvider: React.FC<AppContextProps> = ({ children }) => {
         Cookies.remove("token");
         setUser(null);
         setIsAuthenticated(false);
-        useToast("Logout", "Please Sign In Again to Chat");
+        // useToast("Logout", "Please Sign In Again to Chat");
     }
 
     const fetchChats = async () => {

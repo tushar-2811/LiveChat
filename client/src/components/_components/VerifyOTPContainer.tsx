@@ -30,7 +30,6 @@ import {
 } from "@/components/ui/input-otp"
 import { otpFormSchema } from "@/Schema/Schema";
 import { useRouter, useSearchParams } from "next/navigation";
-import useToast from "@/components/_components/useToast";
 import axios from "axios";
 import { config } from "@/config/config";
 
@@ -42,14 +41,28 @@ const VerifyOTPContainer = ({
     fetchUsers
 } : any) => {
     const [loading, setLoading] = useState<boolean>(false);
-    const TIMER_INITIAL = 10;
+    const TIMER_INITIAL = 60;
     const [timer, setTimer] = useState<number>(TIMER_INITIAL);
     const router = useRouter();
-
     const searchParams = useSearchParams();
-    const email = searchParams.get("email");
+     const email = searchParams.get("email");
+    
+    // ✅ CALL useToast AT THE TOP LEVEL
+    useEffect(() => {
+        if (!email) {
+            router.push('/login');
+        }
+    }, [email, router]);
 
-
+    useEffect(() => {
+        if (timer > 0) {
+            const interval = setInterval(() => {
+                setTimer((prev) => prev - 1);
+            }, 1000);
+            return () => clearInterval(interval);
+        };
+    }, [timer]);
+  
     const form = useForm<z.infer<typeof otpFormSchema>>({
         resolver: zodResolver(otpFormSchema),
         defaultValues: {
@@ -68,19 +81,24 @@ const VerifyOTPContainer = ({
             console.log(otp);
             console.log("data verify otp", data);
             Cookies.set("token", data.token , {
-                expires: 7, // Cookie expires in 7 days
-                secure: false, // Cookie only sent over HTTPS
-                path: '/', // Cookie available on all paths
+                expires: 7,
+                secure: false,
+                path: '/',
             });
-            useToast("Success", "OTP Verified Successfully");
+            
+            // useToast("Success", "OTP Verified Successfully");
             setIsAuthenticated(true);
+            console.log('auth' , true);
             fetchChats();
+            console.log('fetchChats');
             fetchUsers();
+            console.log('fetchUsrs');
             setUser(data.user);
-            router.replace('/chat');
+            console.log("data of user" , data.user);
+            router.push('/chat');
         } catch (error: any) {
             console.log(error);
-            useToast("Error Occurred", error.response.data.message);
+            // useToast("Error Occurred", error.response.data.message);
         } finally {
             setLoading(false);
         }
@@ -93,32 +111,17 @@ const VerifyOTPContainer = ({
                 router.push('/login');
                 return;
             }
-            const { data: any } = await axios.post(`${config.USER_SERVICE.SEND_OTP}`, {
+            const { data } = await axios.post(`${config.USER_SERVICE.SEND_OTP}`, {
                 email: email,
             });
             setTimer(TIMER_INITIAL);
-            useToast("OTP Sent", `A new OTP was sent to ${email}`);
+            // useToast("OTP Sent", `A new OTP was sent to ${email}`);
         } catch (err: any) {
-            useToast("Error", err?.message || "Failed to resend OTP");
+            // useToast("Error", err?.message || "Failed to resend OTP");
         } finally {
             setLoading(false);
         }
     }
-
-    useEffect(() => {
-        if (!email) {
-            router.push('/login');
-        }
-    }, [email, router]);
-
-    useEffect(() => {
-        if (timer > 0) {
-            const interval = setInterval(() => {
-                setTimer((prev) => prev - 1);
-            }, 1000);
-            return () => clearInterval(interval);
-        };
-    }, [timer]);
 
     return (
         <div className='min-h-screen flex items-center justify-center'>

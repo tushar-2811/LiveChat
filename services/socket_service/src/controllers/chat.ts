@@ -72,7 +72,7 @@ export const getAllChatsController = asyncHandler(async (req:AuthenticatedReques
            });
 
            try {
-             const {data} = await axios.get(`${process.env.USER_SERVICE_URL}/api/v1/users/${otherUserId}`);
+             const {data} = await axios.get(`${process.env.USER_SERVICE_URL}/api/v1/user/${otherUserId}`);
                return {
                   user : data,
                   chat : {

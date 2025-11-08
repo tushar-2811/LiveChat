@@ -1,29 +1,32 @@
 "use client";
-
 import { SpinnerEmpty } from "@/components/_components/Spinner";
 import VerifyOTPContainer from "@/components/_components/VerifyOTPContainer";
 import { useAppData } from "@/context/appContext";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 
 const page = () => {
-    const {isAuthenticated , setIsAuthenticated , setUser , loading: userLoading , fetchChats , fetchUsers} = useAppData();
+    const { isAuthenticated, setIsAuthenticated, setUser, loading: userLoading, fetchChats, fetchUsers } = useAppData();
+    const router = useRouter();
 
-    if(userLoading){
-        return <SpinnerEmpty/>
-    }
+    useEffect(() => {
+        if (isAuthenticated) {
+            router.replace('/chat');
+        }
+    }, [isAuthenticated, router]);
 
-    if(isAuthenticated){
-        redirect('/chat');
+    if (userLoading || isAuthenticated) {
+        return <SpinnerEmpty />
     }
 
     return (
-       <VerifyOTPContainer 
-         setIsAuthenticated={setIsAuthenticated} 
-         setUser={setUser}
-         fetchChats={fetchChats}
-         fetchUsers={fetchUsers}
-         />  
+        <VerifyOTPContainer
+            setIsAuthenticated={setIsAuthenticated}
+            setUser={setUser}
+            fetchChats={fetchChats}
+            fetchUsers={fetchUsers}
+        />
     )
 }
 

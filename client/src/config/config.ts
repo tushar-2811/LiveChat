@@ -15,7 +15,9 @@ export const config = {
     CHAT_SERVICE : {
         URL : CHAT_BASE_URL,
         GET_ALL_CHATS : `${CHAT_BASE_URL}/api/v1/chat/get-all-chats`,
-        CREATE_NEW_CHAT : `${CHAT_BASE_URL}/api/v1/chat/create-new-chat`
+        CREATE_NEW_CHAT : `${CHAT_BASE_URL}/api/v1/chat/create-new-chat`,
+        FETCH_SINGLE_CHAT : `${CHAT_BASE_URL}/api/v1/chat/message`,
+        SEND_MESSAGE : `${CHAT_BASE_URL}/api/v1/chat/message`
     }
 };
 

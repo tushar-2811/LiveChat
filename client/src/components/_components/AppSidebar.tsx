@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import { Calendar, ChevronUp, CornerDownRight, CornerUpLeft, Home, Inbox, MessageCircle, Plus, Search, SearchIcon, Settings, TextSearchIcon, User2, UserRoundSearchIcon, X } from "lucide-react"
+import { Calendar, ChevronUp, CornerDownRight, CornerUpLeft, Home, Inbox, LogOutIcon, MessageCircle, Plus, Search, SearchIcon, Settings, TextSearchIcon, User2, UserRoundSearchIcon, X } from "lucide-react"
 
 import {
   Sidebar,
@@ -35,7 +35,9 @@ interface AppSidebarProps {
   chats: any[] | null;
   selectedUser: string | null;
   setSelectedUser: (userId: string | null) => void;
+  setCurrentChatId : (chatId : string | null) => void;
   handleLogout: () => void;
+  createChat : (user: User) => void;
 }
 
 
@@ -49,7 +51,9 @@ const AppSidebar = ({
   chats,
   selectedUser,
   setSelectedUser,
-  handleLogout
+  setCurrentChatId,
+  handleLogout,
+  createChat
 }: AppSidebarProps) => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchedUsers, setSearchedUsers] = useState<User[] | null>(null);
@@ -121,7 +125,9 @@ const AppSidebar = ({
                     <div
                       key={user._id}
                       className={`flex items-center gap-4 p-2 cursor-pointer  ${selectedUser === user._id ? 'bg-black text-white' : ''}`}
-                      onClick={() => setSelectedUser(user._id)}
+                      onClick={() => {
+                        createChat(user);
+                      }}
                     >
                       <AvatarComponent />
                       <span className='text-lg'>{user.name}</span>
@@ -135,23 +141,24 @@ const AppSidebar = ({
 
               {
                 chats && chats.length > 0 && (
-                  <div className='mt-2 border rounded-2xl bg-white border-black shadow max-h-48 overflow-y-auto'>
+                  <div className='mt-2 flex flex-col gap-4  overflow-y-auto'>
                     {chats.map((chat) => {
                       const latestMessage = chat.chat.latestMessage;
-                      const isSelected = selectedUser === chat.chat._id;
+                      const isSelected = selectedUser === chat.user.user._id;
                       const isSentByMe = latestMessage?.sender === loggedInUser?._id;
                       const unSeenCount = chat.chat.unSeenCount || 0;
-
-                      console.log(latestMessage);
-
+                       console.log("char-->" , chat);
                       return <div
                         key={chat.chat._id}
-                        className={`flex items-center gap-4 p-2 cursor-pointer  ${isSelected ? 'bg-black text-white' : ''}`}
-                        onClick={() => setSelectedUser(chat.chat._id)}
+                        className={`flex border border-black shadow max-h-48 rounded-2xl items-center gap-4 p-2 cursor-pointer  ${isSelected ? 'bg-black text-white' : ''}`}
+                        onClick={() => {
+                          setSelectedUser(chat.user.user._id);
+                          setCurrentChatId(chat.chat._id);
+                        }}
                       >
                         <AvatarComponent />
                         <div>
-                           <span className='text-lg'>{chat.user.name}</span>
+                           <span className='text-lg'>{chat.user.user.name}</span>
                           {latestMessage && 
                            <div className='flex gap-1 items-center'>
                                {isSentByMe ? 
@@ -199,7 +206,11 @@ const AppSidebar = ({
                   <span>Account</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <span className='text-md text-red-500'>Sign out</span>
+                  <span
+                  onClick={handleLogout} 
+                  className='text-md text-red-500 flex gap-2 items-center'>
+                   <LogOutIcon className='text-red-500'/> Sign out
+                  </span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
