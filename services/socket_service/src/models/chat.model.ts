@@ -9,7 +9,7 @@ const schema:Schema<Ichat> = new Schema({
         }
     ],
     latestMessage : {
-        type : String,
+        text : String,
         sender: String
     }
      

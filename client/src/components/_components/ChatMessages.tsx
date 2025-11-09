@@ -45,7 +45,7 @@ const ChatMessages = ({
 
     return (
         <div className='flex-1 overflow-hidden'>
-            <div className='h-full max-h-[calc(100vh-215px)] overflow-y-auto p-2 space-y-2 custom-scroll'>
+            <div className='h-full min-h-[calc(100vh-215px)] overflow-y-auto p-2 space-y-2 custom-scroll'>
                 {
                     !selectedUser ? (
                         <div className='flex justify-center gap-2 items-center mt-20'>

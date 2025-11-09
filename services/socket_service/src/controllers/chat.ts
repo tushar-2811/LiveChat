@@ -113,6 +113,8 @@ export const sendMessageController = asyncHandler(async (req: AuthenticatedReque
    const { chatId, text } = req.body;
    const imageFile = req.file; // Assuming you're using multer for file uploads
 
+   console.log("message" , req.body);
+
    if(!senderId){
       res.status(401).json({
          success : false,
@@ -139,6 +141,8 @@ export const sendMessageController = asyncHandler(async (req: AuthenticatedReque
 
    const chat = await Chat.findById(chatId);
 
+   console.log("char find" , chat);
+
    if(!chat){
       res.status(404).json({
          success : false,
@@ -149,6 +153,8 @@ export const sendMessageController = asyncHandler(async (req: AuthenticatedReque
 
    const isUserInChat = chat.users.some( (id) => id.toString() === senderId.toString() );
 
+   console.log("is user in chat" , isUserInChat);
+
    if(!isUserInChat){
       res.status(403).json({
          success : false,
@@ -158,6 +164,8 @@ export const sendMessageController = asyncHandler(async (req: AuthenticatedReque
    };
 
    const otherUserId = chat.users.find((id) => id.toString() !== senderId.toString());
+
+   console.log("other user id" , otherUserId);
 
    if(!otherUserId){
       res.status(401).json({
@@ -187,15 +195,21 @@ export const sendMessageController = asyncHandler(async (req: AuthenticatedReque
 
    const newMessage = await Message.create(messageData);
 
-   const latestMessageText = imageFile ? "Image 📷"  : text;
+   console.log("new message" , newMessage);
 
-   await Chat.findByIdAndUpdate(chatId, {
+   const latestMessageText = imageFile ? "Image"  : text as string;
+
+   const temp = await Chat.findByIdAndUpdate(chatId, {
       latestMessage : {
          text : latestMessageText,
          sender : senderId
       },
       updateAt : new Date()
    },{new : true});
+
+
+   console.log("temp->" , temp);
+
 
    // emit socket event to other user
 
@@ -270,7 +284,8 @@ export const getMessagesByChatController = asyncHandler(async (req:Authenticated
    const otherUserId = chat.users.find((id) => id.toString() !== userId.toString());
 
    try {
-      const {data} = await axios.get(`${process.env.USER_SERVICE_URL}/api/v1/users/${otherUserId}`);
+      console.log("fetching data inside************");
+      const {data} = await axios.get(`${process.env.USER_SERVICE_URL}/api/v1/user/${otherUserId}`);
 
       if(!otherUserId){
          res.status(401).json({

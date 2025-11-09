@@ -13,6 +13,9 @@ interface ChatContainerProps {
     messages: Message[] | null;
     loggedInUser: User | null;
     currentChatId : string | null;
+    message : string;
+    setMessage: (message: string) => void;
+    handleSendMessage : (e: any , imageFile: File | null) => void
 }
 
 
@@ -23,11 +26,14 @@ const ChatContainer = ({
     selectedUser,
     messages,
     loggedInUser,
-    currentChatId
+    currentChatId,
+    message,
+    setMessage,
+    handleSendMessage
 }: ChatContainerProps) => {
     return (
-        <div className='max-w-[calc(100vw-259px)]'>
-            <div className='w-full h-24 py-6 px-4 border-b-2'>
+        <div className='max-w-[calc(100vw-259px)] relative'>
+            <div className='w-full h-24 py-6 px-4 border-b-2 fixed top-0 z-50'>
                 <ChatHeader
                     user={user}
                     setSidebarOpen={setSidebarOpen}
@@ -40,7 +46,15 @@ const ChatContainer = ({
                 loggedInUser={loggedInUser}
                 currentChatId={currentChatId}
             />
-            <MessageInput/>
+           <div className='w-5/6 fixed bottom-0 z-100 '>
+             <MessageInput
+                currentChatId={currentChatId}
+                message={message}
+                selectedUser={selectedUser}
+                setMessage={setMessage}
+                handleSendMessage={handleSendMessage}
+            />
+           </div>
         </div>
     )
 }

@@ -11,6 +11,7 @@ import Cookies from 'js-cookie';
 import axios from 'axios';
 import { config } from '@/config/config';
 
+
 export interface Message{
    _id : string;
    chatId : string;
@@ -102,7 +103,60 @@ const page = () => {
 
   const handleSendMessage = async(e:any , imageFile: File | null) => {
       e.preventDefault();
-      
+
+      if(!message.trim() && !imageFile){
+        return;
+      }
+
+      if(!selectedUser){
+        return;
+      }
+
+      // socket work
+
+      const token = Cookies.get("token");
+      try {
+        const formData = new FormData();
+        formData.append("chatId" , currentChatId as string);
+
+        if(message.trim()){
+          formData.append("text" , message);
+        }
+
+        if(imageFile){
+          formData.append("image" , imageFile);
+        }
+
+        const {data} = await axios.post(`${config.CHAT_SERVICE.SEND_MESSAGE}`,formData,{
+          headers : {
+            Authorization : `Bearer ${token}`,
+            "Content-Type" : "multipart/form-data"
+          }
+        });
+
+        console.log("message data" , data);
+
+        setMessages((prev) => {
+          const currentMessages = prev || [];
+          const messageExists = currentMessages.some((msg) => msg._id === data.data._id);
+
+          if(!messageExists){
+            return [...currentMessages , data.data];
+          }
+
+          return currentMessages;
+        })
+
+        setMessage("");
+
+        const displayText = imageFile ? "image" : message;
+
+
+      } catch (error:any) {
+        console.log("error while sending message" , error);
+        // toast
+      }
+
   }
 
 
@@ -153,6 +207,9 @@ const page = () => {
         loggedInUser={loggedInUser}
         messages={messages}
         currentChatId={currentChatId}
+        message={message}
+        setMessage={handleTyping}
+        handleSendMessage={handleSendMessage}
         />
       </div>
    </div>
