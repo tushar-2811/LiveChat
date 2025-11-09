@@ -40,7 +40,7 @@ const page = () => {
   
   const [selectedUser , setSelectedUser] = useState<string | null>(null);
   const [currentChatId , setCurrentChatId] = useState<string | null>(null);
-  const [currentMessage , setCurrentMessage] = useState<string>("");
+  const [message , setMessage] = useState<string>("");
   const [SideBarOpen , setSideBarOpen] = useState<boolean>(false);
   const [messages , setMessages] = useState<Message[] | null>(null);
   const [user , setUser] = useState<User | null>(null);
@@ -62,7 +62,7 @@ const page = () => {
         });
 
         setMessages(data.messagesData);
-        setUser(data.user);
+        setUser(data.user.user);
         await fetchChats();
       } catch (error) {
          console.log("failed to load messages" , error);
@@ -91,6 +91,21 @@ const page = () => {
         // call toast
       }
   }
+
+  const handleTyping = async(value: string) => {
+      setMessage(value);
+
+      if(!selectedUser) return;
+
+      // socket setup
+  }
+
+  const handleSendMessage = async(e:any , imageFile: File | null) => {
+      e.preventDefault();
+      
+  }
+
+
 
   useEffect(() => {
      if(!isAuthenticated && !userLoading){
@@ -130,7 +145,15 @@ const page = () => {
        </div>
       </SidebarProvider>
       <div className='min-w-full'>
-        <ChatContainer/>
+        <ChatContainer 
+        user={user} 
+        setSidebarOpen={setSideBarOpen}
+        isTyping={isTyping}
+        selectedUser={selectedUser}
+        loggedInUser={loggedInUser}
+        messages={messages}
+        currentChatId={currentChatId}
+        />
       </div>
    </div>
   )
