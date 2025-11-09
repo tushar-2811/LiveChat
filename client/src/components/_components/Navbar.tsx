@@ -69,7 +69,7 @@ export function Navbar() {
                 </div>
                 <NavigationMenuItem className="">
                     <NavigationMenuTrigger className="text-xl">Home</NavigationMenuTrigger>
-                    <NavigationMenuContent>
+                    <NavigationMenuContent className="z-10" >
                         <ul className="grid gap-2 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                             <li className="row-span-3">
                                 <NavigationMenuLink asChild>

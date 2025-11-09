@@ -55,9 +55,15 @@ const page = () => {
   const fetchSingleChat = async() => {
       try {
         const token = Cookies.get("token");
-        // const {data} = await axios.get(`${config.CHAT_SERVICE.FETCH_SINGLE_CHAT}/${}`)
+        const {data} = await axios.get(`${config.CHAT_SERVICE.FETCH_SINGLE_CHAT}/${currentChatId}` , {
+          headers : {
+            Authorization : `Bearer ${token}`
+          }
+        });
 
-
+        setMessages(data.messagesData);
+        setUser(data.user);
+        await fetchChats();
       } catch (error) {
          console.log("failed to load messages" , error);
          // toast
@@ -91,6 +97,13 @@ const page = () => {
         router.push('/login');
      }
   },[isAuthenticated , userLoading , router]);
+
+  useEffect(() => {
+    if(selectedUser){
+      fetchSingleChat();
+    }
+  },[selectedUser])
+
 
   if(userLoading || (!userLoading && !isAuthenticated)){
     return <SpinnerEmpty/>
