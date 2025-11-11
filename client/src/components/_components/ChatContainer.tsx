@@ -15,7 +15,8 @@ interface ChatContainerProps {
     currentChatId : string | null;
     message : string;
     setMessage: (message: string) => void;
-    handleSendMessage : (e: any , imageFile: File | null) => void
+    handleSendMessage : (e: any , imageFile: File | null) => void;
+    onlineUsers : string[]
 }
 
 
@@ -29,7 +30,8 @@ const ChatContainer = ({
     currentChatId,
     message,
     setMessage,
-    handleSendMessage
+    handleSendMessage,
+    onlineUsers
 }: ChatContainerProps) => {
     return (
         <div className=''>
@@ -38,6 +40,7 @@ const ChatContainer = ({
                     user={user}
                     setSidebarOpen={setSidebarOpen}
                     isTyping
+                    onlineUsers={onlineUsers}
                 />
             </div>
             <ChatMessages

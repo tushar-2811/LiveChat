@@ -18,7 +18,6 @@ export interface AuthenticatedRequest extends Request {
 export const isAuthMiddleware = async(req: AuthenticatedRequest , res: Response , next: NextFunction):Promise<void> => {
     try {
         const authHeader = req.headers.authorization;
-        console.log("authHeader",authHeader);
 
         if(!authHeader || !authHeader.startsWith("Bearer ")){
            res.status(401).json({

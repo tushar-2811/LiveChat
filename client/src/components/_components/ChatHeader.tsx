@@ -6,13 +6,16 @@ interface ChatHeaderProps {
   user: User | null;
   setSidebarOpen: (open: boolean) => void;
   isTyping: boolean;
+  onlineUsers: string[]
 }
 
 const ChatHeader = ({
   user,
   setSidebarOpen,
-  isTyping
+  isTyping,
+  onlineUsers
 }: ChatHeaderProps) => {
+   const isUserOnline = onlineUsers.includes(user?._id as string);
   return (
     <>
       {/* <div className='sm:hidden fixed top-5 right-4 z-30'>
@@ -28,6 +31,11 @@ const ChatHeader = ({
           <p className='text-black text-4xl'>
             {user?.name}
           </p>
+          {
+            isUserOnline && <span>
+              
+            </span>
+          }
         </div>
         // to show typing status
         ) : (

@@ -57,6 +57,12 @@ const MessageInput = ({
                         </DialogHeader>
                         <div>
                             {imageFile && <img src={URL.createObjectURL(imageFile)} alt="preview" />}
+                            {/* {imageFile && 
+                            <Input 
+                            type='text' 
+                            placeholder='Add Caption (optional)' 
+                            onChange={(e: any) => setMessage(e.target.value)}/> 
+                            } */}
                         </div>
                         <DialogFooter>
                             <DialogClose asChild>

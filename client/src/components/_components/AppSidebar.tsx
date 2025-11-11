@@ -51,6 +51,7 @@ interface AppSidebarProps {
   setCurrentChatId: (chatId: string | null) => void;
   handleLogout: () => void;
   createChat: (user: User) => void;
+  onlineUsers : string[]
 }
 
 
@@ -66,13 +67,16 @@ const AppSidebar = ({
   setSelectedUser,
   setCurrentChatId,
   handleLogout,
-  createChat
+  createChat,
+  onlineUsers
 }: AppSidebarProps) => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchedUsers, setSearchedUsers] = useState<User[] | null>(null);
   const [showSearchBar, setShowSearchBar] = useState<boolean>(false);
   const [showNewDialog, setShowNewDialog] = useState<boolean>(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState<boolean>(false);
+
+  console.log("ONline users" , onlineUsers);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -212,9 +216,11 @@ const AppSidebar = ({
                       const isSelected = selectedUser === chat.user.user._id;
                       const isSentByMe = latestMessage?.sender === loggedInUser?._id;
                       const unSeenCount = chat.chat.unSeenCount || 0;
+                      const isOnline = onlineUsers.includes(chat.user.user._id);
+                      
                       return <div
                         key={chat.chat._id}
-                        className={`flex border border-black shadow max-h-48 rounded-2xl items-center gap-4 p-2 cursor-pointer  ${isSelected ? 'bg-black text-white' : ''}`}
+                        className={`flex relative border border-black shadow max-h-48 rounded-2xl items-center gap-4 p-2 cursor-pointer  ${isSelected ? 'bg-black text-white' : ''}`}
                         onClick={() => {
                           setSelectedUser(chat.user.user._id);
                           setCurrentChatId(chat.chat._id);
@@ -243,6 +249,9 @@ const AppSidebar = ({
                         }
 
                         {/* online user left */}
+                        {
+                          isOnline && <div className='absolute right-2 w-3 h-3 bg-green-500 rounded-full'></div>
+                        }
                       </div>
                     })}
                   </div>

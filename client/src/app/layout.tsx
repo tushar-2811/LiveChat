@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { AppProvider } from "@/context/appContext";
+import { SocketProvider } from "@/context/socketContext";
 
 
 export const metadata: Metadata = {
@@ -18,9 +19,11 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AppProvider>
-          {children}
+          <SocketProvider>
+            {children}
+          </SocketProvider>
         </AppProvider>
-        <Toaster/>
+        <Toaster />
       </body>
     </html>
   );

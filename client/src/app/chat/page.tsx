@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import { config } from '@/config/config';
+import { useSocket } from '@/context/socketContext';
 
 
 export interface Message{
@@ -38,6 +39,10 @@ const page = () => {
     setChats, 
     loading: userLoading
   } = useAppData();
+
+  const {
+    onlineUsers
+  } = useSocket();
   
   const [selectedUser , setSelectedUser] = useState<string | null>(null);
   const [currentChatId , setCurrentChatId] = useState<string | null>(null);
@@ -196,6 +201,7 @@ const page = () => {
           setCurrentChatId={setCurrentChatId}
           handleLogout={handleLogout}
           createChat={createChat}
+          onlineUsers={onlineUsers}         
         />
           </SidebarProvider>
        </div>
@@ -212,6 +218,7 @@ const page = () => {
         message={message}
         setMessage={handleTyping}
         handleSendMessage={handleSendMessage}
+        onlineUsers={onlineUsers}
         />
       </div>
    </div>
