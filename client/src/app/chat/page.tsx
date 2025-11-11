@@ -179,9 +179,10 @@ const page = () => {
   }
 
   return (
-   <div className='min-h-screen flex relative overflow-hidden'>
-      <SidebarProvider>
-       <div>
+   <div className='min-h-screen flex'>
+      
+       <div className=''>
+        <SidebarProvider>
         <AppSidebar
           sidebarOpen={SideBarOpen}
           setSidebarOpen={setSideBarOpen}
@@ -196,9 +197,10 @@ const page = () => {
           handleLogout={handleLogout}
           createChat={createChat}
         />
+          </SidebarProvider>
        </div>
-      </SidebarProvider>
-      <div className='min-w-full'>
+    
+      <div className='w-full md:w-[calc(100vw-256px)] border-2  border-red-500'>
         <ChatContainer 
         user={user} 
         setSidebarOpen={setSideBarOpen}

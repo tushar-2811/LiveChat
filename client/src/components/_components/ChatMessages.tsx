@@ -45,7 +45,7 @@ const ChatMessages = ({
 
     return (
         <div className='flex-1 overflow-hidden'>
-            <div className='h-full min-h-[calc(100vh-215px)] overflow-y-auto p-2 space-y-2 custom-scroll'>
+            <div className=' h-[calc(100vh-215px)] overflow-y-auto p-2 space-y-2 custom-scroll'>
                 {
                     !selectedUser ? (
                         <div className='flex justify-center gap-2 items-center mt-20'>
@@ -97,7 +97,7 @@ const ChatMessages = ({
                                           <div className='flex items-center ml-1'>
                                                {
                                                  e.isSeen ? <div className='flex items-center gap-1 text-black'>
-                                                    <CheckCheck  className='w-3 h-3 text-neutral-600'/>
+                                                    <CheckCheck  className='w-3 h-3 text-black'/>
                                                     {
                                                         e.seenAt && <span>{moment(e.seenAt).format("hh:mm A")}</span>
                                                     }

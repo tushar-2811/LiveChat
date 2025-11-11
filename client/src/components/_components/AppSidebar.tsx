@@ -72,7 +72,7 @@ const AppSidebar = ({
   const [searchedUsers, setSearchedUsers] = useState<User[] | null>(null);
   const [showSearchBar, setShowSearchBar] = useState<boolean>(false);
   const [showNewDialog, setShowNewDialog] = useState<boolean>(false);
-  const [showLogoutDialog , setShowLogoutDialog] = useState<boolean>(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -250,28 +250,28 @@ const AppSidebar = ({
               }
 
               {/* logout dialog box */}
-                                    <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Sign Out</DialogTitle>
-            <DialogDescription>
-               Do you really want to Sign Out ?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline" className='cursor-pointer'>Cancel</Button>
-            </DialogClose>
-            <Button 
-            variant={'destructive'} 
-            type="submit" 
-            className='cursor-pointer'
-            onClick={handleLogout}
-            >Sign Out
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Sign Out</DialogTitle>
+                    <DialogDescription>
+                      Do you really want to Sign Out ?
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button variant="outline" className='cursor-pointer'>Cancel</Button>
+                    </DialogClose>
+                    <Button
+                      variant={'destructive'}
+                      type="submit"
+                      className='cursor-pointer'
+                      onClick={handleLogout}
+                    >Sign Out
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
 
             </SidebarMenu>
           </SidebarGroupContent>
