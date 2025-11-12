@@ -3,6 +3,10 @@ import type { AuthenticatedRequest } from "../middlewares/authMiddleware.js";
 import { Chat } from "../models/chat.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Message } from "../models/message.model.js";
+import { getRecieverSocketId, SocketManager } from "../config/socket.js";
+import { server } from "../server.js";
+
+const socketInstance = SocketManager.getInstance(server);
 
 export const createChatController = asyncHandler(async (req:AuthenticatedRequest , res) =>{
      const userId = req.user?._id;
@@ -170,11 +174,24 @@ export const sendMessageController = asyncHandler(async (req: AuthenticatedReque
       return;
    };
 
+   // socket
+   const recieverSocketId = getRecieverSocketId(otherUserId.toString());
+
+   let isRecieverInChatRoom = false;
+
+   if(recieverSocketId){
+      const recieverSocket = socketInstance.getSocket(recieverSocketId);
+      if(recieverSocket && recieverSocket.rooms.has(chatId)){
+         isRecieverInChatRoom = true;
+      }
+   }
+
+
    let messageData: any = {
       chatId,
       sender : senderId,
-      isSeen : false,
-      seenAt : undefined,
+      isSeen : isRecieverInChatRoom,
+      seenAt : isRecieverInChatRoom ? new Date() : undefined,
    };
 
    if(imageFile){
@@ -193,7 +210,7 @@ export const sendMessageController = asyncHandler(async (req: AuthenticatedReque
 
    const latestMessageText = imageFile ? "Image"  : text as string;
 
-   const temp = await Chat.findByIdAndUpdate(chatId, {
+   await Chat.findByIdAndUpdate(chatId, {
       latestMessage : {
          text : latestMessageText,
          sender : senderId
@@ -201,11 +218,26 @@ export const sendMessageController = asyncHandler(async (req: AuthenticatedReque
       updateAt : new Date()
    },{new : true});
 
-
-   
-
-
    // emit socket event to other user
+   socketInstance.emitToRoom(chatId , "newMessage" , newMessage);
+
+   if(recieverSocketId){
+      socketInstance.emitToRoom(recieverSocketId , "newMessage" , newMessage);
+   }
+
+   const senderSocketId = getRecieverSocketId(senderId.toString());
+   if(senderSocketId){
+      socketInstance.emitToRoom(senderSocketId , "newMessage" , newMessage);
+   }
+
+   if(isRecieverInChatRoom && senderSocketId){
+      socketInstance.emitToRoom(senderSocketId , "seenMessage" , {
+         chatId: chatId,
+         seenBy : otherUserId,
+         messageIds : [newMessage._id]
+      })
+   }
+
 
    res.status(201).json({
       success : true,
@@ -289,6 +321,17 @@ export const getMessagesByChatController = asyncHandler(async (req:Authenticated
          return;
       }
       // emit socket event to other user about messages being seen
+      if(messagesToMarkSeen.length > 0){
+         const otherUserSocketId = getRecieverSocketId(otherUserId.toString());
+         if(otherUserSocketId){
+            socketInstance.emitToRoom(otherUserSocketId , "seenMessage" , {
+               chatId : chatId,
+               seenBy : userId,
+               messageIds : messagesToMarkSeen.map((message) => message._id)
+            })
+         }
+
+      }
       
       res.status(200).json({
          success : true,

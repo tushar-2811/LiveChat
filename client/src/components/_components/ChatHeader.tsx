@@ -26,18 +26,18 @@ const ChatHeader = ({
 
       {
         user ? (
-        <div className='flex items-center gap-2'>
+        <div className='flex items-center gap-2 relative'>
           <User2 className='h-10 w-10' />
           <p className='text-black text-4xl'>
-            {user?.name}
+            {user?.name} 
+           {/* typing */}
           </p>
           {
-            isUserOnline && <span>
-              
+             isUserOnline && <span className='absolute bottom-1 right-1 w-5 h-5 rounded-full bg-green-500'>
+               <span className='absolute inset-0 rounded-full bg-green-500 animate-ping opacity-75'></span>
             </span>
           }
         </div>
-        // to show typing status
         ) : (
            <div className='flex items-center gap-2'>
           <User2 className='h-10 w-10' />

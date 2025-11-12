@@ -3,6 +3,10 @@ import http from 'http';
 
 const userSocketMap: Record<string , string> = {};
 
+export const getRecieverSocketId = (recieverId : string): string | undefined => {
+    return userSocketMap[recieverId];
+}
+
 export class SocketManager {
     private static instance: SocketManager;
     private io: Server;
@@ -46,6 +50,27 @@ export class SocketManager {
 
             this.io.emit("getOnlineUser" , Object.keys(userSocketMap));
 
+            if(userId){
+                socket.join(userId);
+            }
+
+            socket.on("typing" , (data) => {
+                console.log(`user ${data.userId} is typing`);
+                this.emitToRoom(data.chatId , "userTyping" , {
+                    chatId : data.chatId,
+                    userId : data.userId
+                })
+            });
+
+            socket.on("stopTyping" , (data) => {
+                 console.log(`user ${data.userId} stopped typing`);
+                  this.emitToRoom(data.chatId , "userStoppedTyping" , {
+                    chatId : data.chatId,
+                    userId : data.userId
+                })
+            })
+
+
             socket.on("disconnect", () => {
                 console.log("User disconnected :: ", socket.id);
                 if(userId){
@@ -67,18 +92,22 @@ export class SocketManager {
             this.io.emit('message' , data);
         })
 
-        socket.on("joinRoom" , (roomId: string) => {
-            socket.join(roomId);
-            console.log(`🟢 User ${socket.id} joined Room - ${roomId}`);
+        socket.on("joinChat" , (chatId: string) => {
+            socket.join(chatId);
+            console.log(`🟢 User ${socket.id} joined Room - ${chatId}`);
         })
 
-        socket.on("leaveRoom" , (roomId: string) => {
-            socket.leave(roomId);
-            console.log(`🔴 User ${socket.id} Left Room - ${roomId}`);
+        socket.on("leaveChat" , (chatId: string) => {
+            socket.leave(chatId);
+            console.log(`🔴 User ${socket.id} Left Room - ${chatId}`);
         })
     }
 
-    public emitToRoom(roomId: string , event: string , payload: string){
+    public getSocket(socketId:any){
+        return this.io.sockets.sockets.get(socketId);
+    }
+
+    public emitToRoom(roomId: string , event: string , payload: any){
         this.io.to(roomId).emit(event,payload);
     }
 
