@@ -210,6 +210,13 @@ const page = () => {
 
       const displayText = imageFile ? "image" : message;
 
+      moveChatToTop(currentChatId! , {
+        text : displayText,
+        sender : data.sender
+      },false);
+
+    
+
 
     } catch (error: any) {
       console.log("error while sending message", error);
@@ -240,13 +247,45 @@ const page = () => {
            }
 
            return currentMessages;
-        })
+        });
+
+        moveChatToTop(message.chatId , message , false);
+      }else{
+        moveChatToTop(message.chatId , message , true);
       }
      });
 
      // moveToTop()
+
+     socket?.on("seenMessage" , (data) => {
+       console.log("message seen by->" , data);
+
+       if(currentChatId === data.chatId){
+         setMessages((prev: any) => {
+          if(!prev) return null;
+
+          return prev.map((msg: any) => {
+             if(msg.sender === loggedInUser?._id && data.messageIds && data.messageIds.includes(msg._id)){
+                 return {
+                  ...msg,
+                  isSeen : true,
+                  seenAt : new Date().toString()
+                 }
+             }else if(msg.sender === loggedInUser?._id && !data.messageIds){
+                  return {
+                  ...msg,
+                  isSeen : true,
+                  seenAt : new Date().toString()
+                 }
+             }
+             return msg;
+          })
+         })
+       }
+     })
      return () => {
-       socket?.off("newMessage")
+       socket?.off("newMessage");
+       socket?.off("seenMessage");
      }
 
 
