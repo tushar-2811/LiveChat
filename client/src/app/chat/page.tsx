@@ -311,9 +311,9 @@ const page = () => {
 
   return (
     <div className='min-h-screen flex'>
+      <SidebarProvider>
 
       <div className=''>
-        <SidebarProvider>
           <AppSidebar
             sidebarOpen={SideBarOpen}
             setSidebarOpen={setSideBarOpen}
@@ -329,7 +329,6 @@ const page = () => {
             createChat={createChat}
             onlineUsers={onlineUsers}
           />
-        </SidebarProvider>
       </div>
 
       <div className='w-full md:w-[calc(100vw-256px)] border-2  border-red-500'>
@@ -347,6 +346,7 @@ const page = () => {
           onlineUsers={onlineUsers}
         />
       </div>
+      </SidebarProvider>
     </div>
   )
 }

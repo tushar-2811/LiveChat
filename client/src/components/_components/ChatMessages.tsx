@@ -38,9 +38,13 @@ const ChatMessages = ({
     }, [messages]);
 
     useEffect(() => {
-        bottomRef.current?.scrollIntoView({
+       const timer = setTimeout(() => {
+         bottomRef.current?.scrollIntoView({
             behavior: "smooth"
         });
+       },200);
+
+       return () => clearTimeout(timer);
     }, [messages, uniqueMessage])
 
     return (

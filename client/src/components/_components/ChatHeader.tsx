@@ -1,6 +1,7 @@
 import { User } from '@/context/appContext';
 import { Menu, User2 } from 'lucide-react';
 import React from 'react'
+import { SidebarTrigger } from '../ui/sidebar';
 
 interface ChatHeaderProps {
   user: User | null;
@@ -18,11 +19,12 @@ const ChatHeader = ({
    const isUserOnline = onlineUsers.includes(user?._id as string);
   return (
     <>
-      {/* <div className='sm:hidden fixed top-5 right-4 z-30'>
-        <button onClick={() => setSidebarOpen(true)}>
+      <div className='sm:hidden fixed top-8 right-4 z-30'>
+        {/* <button onClick={() => setSidebarOpen(true)}>
           <Menu className='w-5 h-5 text-black' />
-        </button>
-      </div> */}
+        </button> */}
+        <SidebarTrigger/>
+      </div>
 
       {
         user ? (
@@ -50,6 +52,7 @@ const ChatHeader = ({
         </div>
         )
       }
+      
     </>
   )
 }

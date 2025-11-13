@@ -10,7 +10,8 @@ export const config = {
         SEND_OTP : `${USER_BASE_URL}/api/v1/login`,
         VERIFY_OTP : `${USER_BASE_URL}/api/v1/verify-user`,
         GET_MY_PROFILE : `${USER_BASE_URL}/api/v1/get-profile`,
-        GET_ALL_USERS : `${USER_BASE_URL}/api/v1/users/all`
+        GET_ALL_USERS : `${USER_BASE_URL}/api/v1/users/all`,
+        UPDATE_NAME : `${USER_BASE_URL}/api/v1/update-name`
     },
     CHAT_SERVICE : {
         URL : CHAT_BASE_URL,

@@ -36,6 +36,10 @@ import { Input } from '../ui/input'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '../ui/input-group'
 import { Field, FieldGroup, FieldLabel } from '../ui/field'
 import { Button } from '../ui/button'
+import { Label } from '../ui/label'
+import axios from 'axios'
+import { config } from '@/config/config'
+import Cookies from 'js-cookie'
 
 
 interface AppSidebarProps {
@@ -51,7 +55,7 @@ interface AppSidebarProps {
   setCurrentChatId: (chatId: string | null) => void;
   handleLogout: () => void;
   createChat: (user: User) => void;
-  onlineUsers : string[]
+  onlineUsers: string[]
 }
 
 
@@ -75,8 +79,12 @@ const AppSidebar = ({
   const [showSearchBar, setShowSearchBar] = useState<boolean>(false);
   const [showNewDialog, setShowNewDialog] = useState<boolean>(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState<boolean>(false);
+  const [showAccountDialog, setShowAccountDialog] = useState<boolean>(false);
+  const [newName , setNewName] = useState<string>(loggedInUser?.name as string);
 
-  console.log("ONline users" , onlineUsers);
+  console.log("ONline users", onlineUsers);
+
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -89,6 +97,28 @@ const AppSidebar = ({
     } else {
       setSearchedUsers(null);
     }
+  }
+
+  const handleNameUpdate = async () => {
+     try {
+      const token = Cookies.get("token");
+      const {data} = await axios.put(config.USER_SERVICE.UPDATE_NAME,{
+        name : newName
+      }, {
+        headers : {
+          Authorization : `Bearer ${token}`
+        }
+      });
+       
+       Cookies.remove("token");
+       Cookies.set("token" , data.token);
+
+       window.location.reload();
+       
+
+     } catch (error) {
+       console.log("error while updating name" , error);
+     }
   }
   return (
     <Sidebar>
@@ -217,7 +247,7 @@ const AppSidebar = ({
                       const isSentByMe = latestMessage?.sender === loggedInUser?._id;
                       const unSeenCount = chat.chat.unSeenCount || 0;
                       const isOnline = onlineUsers.includes(chat.user.user._id);
-                      
+
                       return <div
                         key={chat.chat._id}
                         className={`flex relative border border-black shadow max-h-48 rounded-2xl items-center gap-4 p-2 cursor-pointer  ${isSelected ? 'bg-black text-white' : ''}`}
@@ -282,6 +312,42 @@ const AppSidebar = ({
                 </DialogContent>
               </Dialog>
 
+              {/* account dialog box */}
+
+              <Dialog open={showAccountDialog} onOpenChange={setShowAccountDialog}>
+                <form>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Edit profile</DialogTitle>
+                      <DialogDescription>
+                        Make changes to your profile here. Click save when you&apos;re
+                        done.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4">
+                      <div className="grid gap-3">
+                        <Label htmlFor="name-1">Name</Label>
+                        <Input 
+                        id="name-1" 
+                        name="name" 
+                        value={newName}
+                        onChange={(e) => {
+                          setNewName(e.target.value)
+                        }}  
+                        />
+                      </div>
+                     
+                    </div>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                      </DialogClose>
+                      <Button onClick={handleNameUpdate}  type="submit">Save changes</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </form>
+              </Dialog>
+
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -302,7 +368,7 @@ const AppSidebar = ({
                 className="w-[--radix-popper-anchor-width]"
               >
                 <DropdownMenuItem>
-                  <span>Account</span>
+                  <span onClick={() => setShowAccountDialog(true)}>Account</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <span

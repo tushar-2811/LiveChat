@@ -24,7 +24,7 @@ const Footer = () => {
     <div className='w-full h-[800px] overflow-hidden bg-black border border-t-white px-8'>
          
          <div className='flex justify-between items-center py-12 border-b border-white/20'>
-              <div className='flex items-center gap-8'>
+              <div className='flex items-center gap-4 md:gap-8'>
                  {data.map((item , index) => (
                     <Link key={index} href={item.link} className='text-neutral-400'>
                         {item.title}
@@ -32,13 +32,13 @@ const Footer = () => {
                  ))}
               </div>
 
-              <p className='text-white font-normal text-5xl'>
+              <p className='hidden md:flex text-white font-normal text-5xl'>
                 hello@chatX.com
               </p>
          </div>
 
 
-         <div className='mt-12 flex justify-between flex-start'>
+         <div className='mt-12 flex flex-col md:flex-row justify-between md:flex-start gap-4 md:gap-0'>
                <div className='flex flex-col gap-2'>
                      <h2 className='text-white text-2xl'>ChatX</h2>
                      <p className='text-white/60 text-md max-w-sm'>Building chat experiences <br /> that are real-time and seamless.<br /></p>
