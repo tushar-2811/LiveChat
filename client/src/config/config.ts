@@ -1,8 +1,8 @@
 
 
-const USER_BASE_URL = process.env.NEXT_PUBLIC_USER_SERVICE_URL || process.env.USER_SERVICE_URL || "http://localhost:4000";
+const USER_BASE_URL = process.env.NEXT_PUBLIC_USER_SERVICE_URL || process.env.USER_SERVICE_URL || "http://65.0.199.69:4000";
 
-const CHAT_BASE_URL = process.env.NEXT_PUBLIC_CHAT_SERVICE_URL || process.env.CHAT_SERVICE_URL || "http://localhost:4005";
+const CHAT_BASE_URL = process.env.NEXT_PUBLIC_CHAT_SERVICE_URL || process.env.CHAT_SERVICE_URL || "http://65.0.199.69:4005";
 
 export const config = {
     USER_SERVICE: {
